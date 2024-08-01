@@ -1,8 +1,6 @@
 import * as dao from "./dao.js";
-let currentUser = null;
 
 export default function UserRoutes(app) {
-  const createUser = async (req, res) => { };
 
   
  // find user
@@ -32,6 +30,7 @@ const findUserById = async (req, res) => {
   const deleteUser = async (req, res) => {
     const status = await dao.deleteUser(req.params.userId);
     res.json(status);
+  };
 
 // update user
 const updateUser = async (req, res) => {
@@ -45,16 +44,50 @@ const createUser = async (req, res) => {
     res.json(user);
   };
 
-};
+// sign-in
+const signin = async (req, res) => {
+    const { username, password } = req.body;
+    const currentUser = await dao.findUserByCredentials(username, password);
+    if (currentUser) {
+      req.session["currentUser"] = currentUser;
+      res.json(currentUser);
+    } else {
+      res.status(401).json({ message: "Unable to login. Try again later." });
+    }
+  };
 
+  
 
+// profile
+const profile = async (req, res) => {
+    const currentUser = req.session["currentUser"];
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
 
+    res.json(currentUser);
+  };
 
+// sign-up
+  const signup = async (req, res) => {
+    const user = await dao.findUserByUsername(req.body.username);
+    if (user) {
+      res.status(400).json(
+        { message: "Username already taken" });
+      return;
+    }
+    const currentUser = await dao.createUser(req.body);
+    req.session["currentUser"] = currentUser;
+  };
 
-  const signup = async (req, res) => { };
-  const signin = async (req, res) => { };
-  const signout = (req, res) => { };
-  const profile = async (req, res) => { };
+  
+  //sign-out
+  const signout = (req, res) => {
+    req.session.destroy();
+    res.sendStatus(200);
+  };
+
 
   app.post("/api/users", createUser);
   app.get("/api/users", findAllUsers);
@@ -65,5 +98,5 @@ const createUser = async (req, res) => {
   app.post("/api/users/signin", signin);
   app.post("/api/users/signout", signout);
   app.post("/api/users/profile", profile);
-}
 
+}
