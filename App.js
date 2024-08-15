@@ -10,6 +10,9 @@ import CourseRoutes from "./Kanbas/Courses/routes.js";
 import ModuleRoutes from "./Kanbas/Modules/routes.js";
 import AssignmentRoutes from "./Kanbas/Assignments/routes.js";
 import cors from "cors";
+import QuizzesRoutes from "./Kanbas/Quizzes/routes.js";
+import QuestionsRoutes from "./Kanbas/Questions/routes.js";
+import AttemptRoutes from "./Kanbas/Attempt/routes.js";
 
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kanbas-a6" // name of the db
 mongoose.connect(CONNECTION_STRING);
@@ -25,24 +28,30 @@ app.use(
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kanbas",
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
 };
-if (process.env.NODE_ENV !== "development") {
-  sessionOptions.proxy = true;
-  sessionOptions.cookie = {
-    sameSite: "none",
-    secure: true,
-    domain: process.env.NODE_SERVER_DOMAIN,
-  };
-}
+// if (process.env.NODE_ENV !== "development") {
+//     sessionOptions.proxy = true;
+//     sessionOptions.cookie = {
+//         sameSite: "none",
+//         secure: true,
+//         domain: process.env.NODE_SERVER_DOMAIN,
+//     };
+// }
 
-
+app.use(session(sessionOptions));
 app.use(express.json()); // do all your work after this line
 UserRoutes(app);
 
 AssignmentRoutes(app)
 ModuleRoutes(app);
 CourseRoutes(app);
+
+QuizzesRoutes(app);
+QuestionsRoutes(app);
+AttemptRoutes(app);
+
 Lab5(app);
 Hello(app)
 

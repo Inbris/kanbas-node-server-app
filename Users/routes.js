@@ -60,14 +60,15 @@ const signin = async (req, res) => {
 
 // profile
 const profile = async (req, res) => {
-    const currentUser = req.session["currentUser"];
-    if (!currentUser) {
-      res.sendStatus(401);
-      return;
-    }
+  const currentUser = req.session["currentUser"];
+  console.log('profile '+currentUser);
+  if (!currentUser) {
+    res.sendStatus(401);
+    return;
+  }
 
-    res.json(currentUser);
-  };
+  res.json(currentUser);
+};
 
 // sign-up
   const signup = async (req, res) => {
@@ -79,6 +80,9 @@ const profile = async (req, res) => {
     }
     const currentUser = await dao.createUser(req.body);
     req.session["currentUser"] = currentUser;
+    let u = req.session["currentUser"];
+    console.log('sign up'+u);
+    res.json(currentUser);
   };
 
   
